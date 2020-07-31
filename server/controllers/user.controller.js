@@ -7,7 +7,7 @@ const create = async (req, res) => {
   try {
     await user.save();
     return res.status(200).json({
-      message: "Successfully Authenticated!",
+      message: "Successfully Signed up!",
     });
   } catch (err) {
     return res.status(400).json({
@@ -65,16 +65,16 @@ const userByID = async (req, res, next, id) => {
   try {
     let user = await User.findById(id);
     if (!user) {
-      return res.status(400).json({
+      return res.status('400').json({
         error: "User not Found!",
       });
     }
 
-    req.profile(user);
+    req.profile = user;
     next();
   } catch (err) {
-    return res.status(400).json({
-      error: errorHandler.getErrorMessage(err),
+    return res.status('400').json({
+      error: "Could not retireve user",
     });
   }
 };

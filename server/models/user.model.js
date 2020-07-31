@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import crypto from "crypto";
+
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -29,7 +31,7 @@ UserSchema.virtual("password")
   .set(function (password) {
     this._password = password;
     this.salt = this.makeSalt();
-    this.hashed_password = this.encryptedPassword(password);
+    this.hashed_password = this.encryptPassword(password);
   })
   .get(function () {
     return this._password;
@@ -37,7 +39,7 @@ UserSchema.virtual("password")
 
 UserSchema.methods = {
   authenticate: function (plaintext) {
-    return this.encryptedPassword(plaintext) === this.hashed_password;
+    return this.encryptPassword(plaintext) === this.hashed_password;
   },
 
   encryptPassword: function (password) {
