@@ -4,6 +4,7 @@ import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
+import { Link } from "react-router-dom";
 const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: 600,
@@ -33,6 +34,10 @@ export default function Home() {
           Welcome to the MERN Skeleton home page.
         </Typography>
       </CardContent>
+      <Link to="/users">Users</Link>
+      <Link to="/signup">Signup</Link>
+      <Link to="/signin">Signin</Link>
+      <Link to="/profile">Profile</Link>
     </Card>
   );
 }
