@@ -10,6 +10,11 @@ const useStyles = makeStyles((theme) => ({
   error: {
     verticalAlign: "middle",
   },
+  bigAvatar: {
+    width: 60,
+    height: 60,
+    margin: "auto",
+  },
   title: {
     marginTop: theme.spacing(2),
     color: theme.palette.openTitle,
@@ -22,6 +27,9 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: "auto",
     marginBottom: theme.spacing(2),
+  },
+  filename: {
+    marginLeft: "10px",
   },
 }));
 

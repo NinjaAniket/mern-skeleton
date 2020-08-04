@@ -2,7 +2,7 @@
   "name": "mern-simplesetup",
   "version": "2.0.0",
   "description": "A quick check for your MERN stack installation",
-  "author": "Shama Hoque",
+  "author": "Aniket Nagapure",
   "license": "MIT",
   "keywords": [
     "react",
@@ -32,6 +32,7 @@
     "cors": "^2.8.5",
     "express": "4.17.1",
     "express-jwt": "^6.0.0",
+    "formidable": "^1.2.2",
     "helmet": "^3.23.3",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.19",

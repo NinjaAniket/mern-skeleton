@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import auth from "../auth/auth-helper";
-import { read } from "./api-user";
+import { read, follow } from "./api-user";
 import { Redirect } from "react-router";
 import {
   Paper,
@@ -18,6 +18,7 @@ import {
 import { Person, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import DeleteProfile from "./DeleteProfile";
+import FollowProfileButton from "./FollowProfileButton";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -34,33 +35,72 @@ const useStyles = makeStyles((theme) => ({
   media: {
     minHeight: 400,
   },
+  bigAvatar: {
+    width: 60,
+    height: 60,
+    margin: "auto",
+  },
 }));
 
 export default function Profile({ match }) {
   const classes = useStyles();
+  const [values, setValues] = useState({
+    user: { following: [], followers: [] },
+    redirectToSignin: false,
+    following: false,
+  });
+  const [posts, setPosts] = useState([]);
 
-  const [user, setUser] = useState({});
-  const [redirectToSignin, setRedirectToSignin] = useState(false);
+  const jwt = auth.isAuthenticated();
 
-  //this effect only needs to reruns when id params changes. i.e move from one profile to another
+  const checkFollow = (user) => {
+    const match = user.followers.some((follower) => {
+      return follower._id == jwt.user._id;
+    });
+    return match;
+  };
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-    const jwt = auth.isAuthenticated();
-    read(
+  const clickFollowButton = (callApi) => {
+    callApi(
       {
-        userId: match.params.userId,
+        userId: jwt.user_id,
       },
       {
         t: jwt.token,
       },
+      values.user._id
+    ).then((data) => {
+      if (data.error) {
+        setValues({
+          ...values,
+          error: data.error,
+        });
+      } else {
+        setValues({
+          ...values,
+          user: data,
+          following: !values.following,
+        });
+      }
+    });
+  };
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    read(
+      {
+        userId: match.params.userId,
+      },
+      { t: jwt.token },
       signal
     ).then((data) => {
       if (data && data.error) {
-        setRedirectToSignin(true);
+        setValues({ ...values, redirectToSignin: true });
       } else {
-        setUser(data);
+        let following = checkFollow(data);
+        setValues({ ...values, user: data });
       }
     });
 
@@ -69,7 +109,11 @@ export default function Profile({ match }) {
     };
   }, [match.params.userId]);
 
-  if (redirectToSignin) {
+  const photoUrl = values.user._id
+    ? `/api/users/photo/${values.user._id}?${new Date().getTime()}`
+    : "/api/users/defaultphoto";
+
+  if (values.redirectToSignin) {
     return <Redirect to="/signin" />;
   }
   return (
@@ -77,33 +121,39 @@ export default function Profile({ match }) {
       <Typography variant="h6" className={classes.title}>
         Profile
       </Typography>
-      <List>
+      <List dense>
         <ListItem>
           <ListItemAvatar>
-            <Avatar>
-              <Person />
-            </Avatar>
+            <Avatar src={photoUrl} className={classes.bigAvatar} />
           </ListItemAvatar>
           <ListItemText
-            primary={user.name}
-            secondary={user.email}
-          ></ListItemText>
+            primary={values.user.name}
+            secondary={values.user.email}
+          />
           {auth.isAuthenticated().user &&
-            auth.isAuthenticated().user._id == user._id && (
-              <ListItemSecondaryAction>
-                <Link to={"/user/edit/" + user._id}>
-                  <IconButton aria-label="Edit" color="primary">
-                    <Edit />
-                  </IconButton>
-                </Link>
-                <DeleteProfile userId={user._id} />
-              </ListItemSecondaryAction>
-            )}
+          auth.isAuthenticated().user._id == values.user._id ? (
+            <ListItemSecondaryAction>
+              <Link to={"/user/edit/" + values.user._id}>
+                <IconButton aria-label="Edit" color="primary">
+                  <Edit />
+                </IconButton>
+              </Link>
+              <DeleteProfile userId={values.user._id} />
+            </ListItemSecondaryAction>
+          ) : (
+            <FollowProfileButton
+              following={values.following}
+              onButtonClick={clickFollowButton}
+            />
+          )}
         </ListItem>
         <Divider />
         <ListItem>
           <ListItemText
-            primary={"Joined " + new Date(user.created).toDateString()}
+            primary={values.user.about}
+            secondary={
+              "Joined: " + new Date(values.user.created).toDateString()
+            }
           />
         </ListItem>
       </List>
