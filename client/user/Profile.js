@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import auth from "../auth/auth-helper";
-import { read, follow } from "./api-user";
+import { read } from "./api-user";
 import { Redirect } from "react-router";
 import {
   Paper,
@@ -19,6 +19,7 @@ import { Person, Edit } from "@material-ui/icons";
 import { Link } from "react-router-dom";
 import DeleteProfile from "./DeleteProfile";
 import FollowProfileButton from "./FollowProfileButton";
+import ProfileTab from "./ProfileTab";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -50,40 +51,7 @@ export default function Profile({ match }) {
     following: false,
   });
   const [posts, setPosts] = useState([]);
-
   const jwt = auth.isAuthenticated();
-
-  const checkFollow = (user) => {
-    const match = user.followers.some((follower) => {
-      return follower._id == jwt.user._id;
-    });
-    return match;
-  };
-
-  const clickFollowButton = (callApi) => {
-    callApi(
-      {
-        userId: jwt.user_id,
-      },
-      {
-        t: jwt.token,
-      },
-      values.user._id
-    ).then((data) => {
-      if (data.error) {
-        setValues({
-          ...values,
-          error: data.error,
-        });
-      } else {
-        setValues({
-          ...values,
-          user: data,
-          following: !values.following,
-        });
-      }
-    });
-  };
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -100,19 +68,51 @@ export default function Profile({ match }) {
         setValues({ ...values, redirectToSignin: true });
       } else {
         let following = checkFollow(data);
-        setValues({ ...values, user: data });
+        setValues({ ...values, user: data, following: following });
+        // loadPosts(data._id);
       }
     });
-
     return function cleanup() {
       abortController.abort();
     };
   }, [match.params.userId]);
 
+  const checkFollow = (user) => {
+    if (user.followers.length > 0) {
+      const match = user.followers.some((follower) => {
+        return follower._id == jwt.user._id;
+      });
+      return match;
+    }
+  };
+  const clickFollowButton = (callApi) => {
+    callApi(
+      {
+        userId: jwt.user._id,
+      },
+      {
+        t: jwt.token,
+      },
+      values.user._id
+    ).then((data) => {
+      if (data.error) {
+        setValues({ ...values, error: data.error });
+      } else {
+        setValues({ ...values, user: data, following: !values.following });
+      }
+    });
+  };
+
+  const removePost = (post) => {
+    const updatedPosts = posts;
+    const index = updatedPosts.indexOf(post);
+    updatedPosts.splice(index, 1);
+    setPosts(updatedPosts);
+  };
+
   const photoUrl = values.user._id
     ? `/api/users/photo/${values.user._id}?${new Date().getTime()}`
     : "/api/users/defaultphoto";
-
   if (values.redirectToSignin) {
     return <Redirect to="/signin" />;
   }
@@ -157,6 +157,10 @@ export default function Profile({ match }) {
           />
         </ListItem>
       </List>
+      <ProfileTab
+        user={values.user}
+        // posts={posts}
+      />
     </Paper>
   );
 }

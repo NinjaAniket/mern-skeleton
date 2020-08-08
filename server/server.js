@@ -5,6 +5,7 @@ import mongoose from "mongoose";
 // Connection URL
 mongoose.Promise = global.Promise;
 mongoose.connect(config.mongoUri, {
+  useFindAndModify: false,
   useNewUrlParser: true,
   useCreateIndex: true,
   useUnifiedTopology: true,

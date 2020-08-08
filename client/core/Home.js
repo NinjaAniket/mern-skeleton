@@ -5,6 +5,9 @@ import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import Typography from "@material-ui/core/Typography";
 import { Link } from "react-router-dom";
+import { Grid } from "@material-ui/core";
+import FindPeople from "../user/FindPeople";
+
 const useStyles = makeStyles((theme) => ({
   card: {
     maxWidth: 600,
@@ -25,15 +28,22 @@ const useStyles = makeStyles((theme) => ({
 export default function Home() {
   const classes = useStyles();
   return (
-    <Card className={classes.card}>
-      <Typography variant="h6" className={classes.title}>
-        Home Page
-      </Typography>
-      <CardContent>
-        <Typography variant="body2" component="p">
-          Welcome to the MERN Skeleton home page.
+    <>
+      <Card className={classes.card}>
+        <Typography variant="h6" className={classes.title}>
+          Home Page
         </Typography>
-      </CardContent>
-    </Card>
+        <CardContent>
+          <Typography variant="body2" component="p">
+            Welcome to the MERN Skeleton home page.
+          </Typography>
+        </CardContent>
+      </Card>
+      <Grid container spacing={8}>
+        <Grid item xs={8} sm={5}>
+          <FindPeople />
+        </Grid>
+      </Grid>
+    </>
   );
 }

@@ -2,18 +2,18 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import { follow, unfollow } from "./api-user";
 
-export default function FollowProfileButton({ onButtonClick, following }) {
+export default function FollowProfileButton(props) {
   const followClick = () => {
-    onButtonClick(follow);
+    props.onButtonClick(follow);
   };
   const unfollowClick = () => {
-    onButtonClick(unfollow);
+    props.onButtonClick(unfollow);
   };
   return (
     <div>
-      {following ? (
+      {props.following ? (
         <Button variant="contained" color="secondary" onClick={unfollowClick}>
-          UnFollow
+          Unfollow
         </Button>
       ) : (
         <Button variant="contained" color="primary" onClick={followClick}>
